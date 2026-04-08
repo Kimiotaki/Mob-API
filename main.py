@@ -1,6 +1,7 @@
-def main():
-    print("Hello from mob-api!")
+from fastapi import FastAPI
+from middleware.auth_middleware import AuthMiddleware
+from api.routes.auth_routes import router as auth_router
 
-
-if __name__ == "__main__":
-    main()
+app = FastAPI()
+app.add_middleware(AuthMiddleware)
+app.include_router(auth_router)
