@@ -5,19 +5,17 @@ from core.security import verify_access_token
 
 class AuthMiddleware(BaseHTTPMiddleware):
     async def dispatch(self, request, call_next):
-        # Here you would implement your authentication logic
-        # For example, you could check for a valid JWT token in the Authorization header
-        public_paths = [
-            "/"
+        public_prefixes = [
             "/auth",
             "/docs",
             "/openapi.json",
             "/redoc",
-            "/favicon.ico"
+            "/favicon.ico",
         ]
 
-        #Allow public endpoints
-        if any(request.url.path.startswith(path) for path in public_paths):
+        if request.url.path == "/" or any(
+            request.url.path.startswith(path) for path in public_prefixes
+        ):
             return await call_next(request)
 
         auth_header = request.headers.get("Authorization")
