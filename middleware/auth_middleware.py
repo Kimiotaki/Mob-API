@@ -1,18 +1,40 @@
 from starlette.middleware.base import BaseHTTPMiddleware
 from fastapi.responses import JSONResponse
 
+from core.security import verify_access_token
+
 class AuthMiddleware(BaseHTTPMiddleware):
     async def dispatch(self, request, call_next):
         # Here you would implement your authentication logic
         # For example, you could check for a valid JWT token in the Authorization header
-        auth_header = request.headers.get("Authorization")
-        if not auth_header or not self.validate_token(auth_header):
-            return JSONResponse(status_code=401, content={"detail": "Unauthorized"})
-        
-        response = await call_next(request)
-        return response
+        public_paths = [
+            "/"
+            "/auth",
+            "/docs",
+            "/openapi.json",
+            "/redoc",
+            "/favicon.ico"
+        ]
 
-    def validate_token(self, token: str) -> bool:
-        # Implement your token validation logic here
-        # This is just a placeholder and should be replaced with actual validation
-        return token == "valid_token"
+        #Allow public endpoints
+        if any(request.url.path.startswith(path) for path in public_paths):
+            return await call_next(request)
+
+        auth_header = request.headers.get("Authorization")
+
+        if not auth_header:
+            return JSONResponse(
+                status_code=401,
+                content={"detail": "Authorization header missing"}
+            )
+
+        # Remove "Bearer "
+        token = auth_header.replace("Bearer ", "")
+
+        if not verify_access_token(token):
+            return JSONResponse(
+                status_code=401,
+                content={"detail": "Invalid token"}
+            )
+
+        return await call_next(request)
