@@ -1,3 +1,5 @@
+import datetime
+
 from fastapi import HTTPException, status
 
 from repositories.user_repository import UserRepository
@@ -29,6 +31,10 @@ class AuthService:
             "email": email,
             "password": hashed_password,
             "role": int(role),
+            "created_by": email,
+            "created_at": datetime.datetime.utcnow(),
+            "modified_by": email,
+            "modified_at": datetime.datetime.utcnow(),
         }
         user_id = await self.user_repository.create_user(user_data)
         return user_id
