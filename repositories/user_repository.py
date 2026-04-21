@@ -11,3 +11,7 @@ class UserRepository:
     async def find_user_by_email(self, email):
         user = await self.collection.find_one({"email": email})
         return user
+
+    async def find_all_users(self):
+        cursor = self.collection.find({}, {"password": 0}).sort("created_at", -1)
+        return await cursor.to_list(length=None)
