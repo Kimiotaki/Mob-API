@@ -3,6 +3,7 @@ from fastapi.responses import JSONResponse
 
 from core.security import verify_access_token
 
+
 class AuthMiddleware(BaseHTTPMiddleware):
     async def dispatch(self, request, call_next):
         public_prefixes = [
@@ -29,10 +30,12 @@ class AuthMiddleware(BaseHTTPMiddleware):
         # Remove "Bearer "
         token = auth_header.replace("Bearer ", "")
 
-        if not verify_access_token(token):
+        payload = verify_access_token(token)
+        if not payload:
             return JSONResponse(
                 status_code=401,
                 content={"detail": "Invalid token"}
             )
 
+        request.state.auth_payload = payload
         return await call_next(request)
