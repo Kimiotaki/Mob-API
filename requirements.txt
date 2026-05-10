@@ -1,0 +1,5 @@
+# Libraries to add:- uv add 
+fastapi 
+uvicorn 
+python-dotenv 
+pydantic
